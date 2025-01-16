@@ -3,6 +3,8 @@
 
 import triton
 import triton.language as tl
+import triton_viz
+from triton_viz.clients import Sanitizer
 
 
 @triton.autotune(
@@ -13,6 +15,7 @@ import triton.language as tl
     ],
     key=['S']
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def softmax_fwd_kernel(
     s,
@@ -49,6 +52,7 @@ def softmax_fwd_kernel(
     ],
     key=['S']
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def softmax_bwd_kernel(
     p,

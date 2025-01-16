@@ -6,6 +6,8 @@ from typing import Optional, Tuple
 import torch
 import triton
 import triton.language as tl
+import triton_viz
+from triton_viz.clients import Sanitizer
 from einops import reduce
 
 from fla.ops.common.chunk_h import chunk_bwd_dh_fn, chunk_fwd_h_fn
@@ -14,6 +16,7 @@ from fla.ops.utils import (chunk_global_reversed_cumsum, chunk_local_cumsum,
 from fla.utils import contiguous
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_gsa_fwd_kernel_intra_K(
     v,
@@ -81,6 +84,7 @@ def chunk_gsa_fwd_kernel_intra_K(
     tl.store(p_o, b_o.to(p_o.dtype.element_ty), boundary_check=(0, 1))
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_gsa_fwd_kernel_K(
     q,
@@ -142,6 +146,7 @@ def chunk_gsa_fwd_kernel_K(
         tl.store(p_A, b_A.to(p_A.dtype.element_ty), boundary_check=(0, 1))
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_gsa_fwd_kernel_intra_Vk(
     q,
@@ -228,6 +233,7 @@ def chunk_gsa_fwd_kernel_intra_Vk(
             tl.store(p_A, b_A.to(A.dtype.element_ty), boundary_check=(0, 1))
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_gsa_fwd_kernel_intra_V(
     q,
@@ -270,6 +276,7 @@ def chunk_gsa_fwd_kernel_intra_V(
         )
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_gsa_fwd_kernel_V(
     q,
@@ -326,6 +333,7 @@ def chunk_gsa_fwd_kernel_V(
     tl.store(p_o, b_o.to(p_o.dtype.element_ty), boundary_check=(0, 1))
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_gsa_bwd_kernel_V(
     k,
@@ -424,6 +432,7 @@ def chunk_gsa_bwd_kernel_V(
         tl.store(p_dA, b_dA.to(p_dA.dtype.element_ty), boundary_check=(0, 1))
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_gsa_bwd_kernel_intra_V(
     q,
@@ -554,6 +563,7 @@ def chunk_gsa_bwd_kernel_intra_V(
     tl.store(p_dg, b_dg.to(p_dg.dtype.element_ty), boundary_check=(0, 1))
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_gsa_bwd_kernel_intra_K(
     v,
@@ -630,6 +640,7 @@ def chunk_gsa_bwd_kernel_intra_K(
     tl.store(p_dA, b_dA.to(dA.dtype.element_ty), boundary_check=(0, 1))
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_gsa_bwd_kernel_K(
     q,
@@ -728,6 +739,7 @@ def chunk_gsa_bwd_kernel_K(
     tl.store(p_dk, b_dk.to(p_dk.dtype.element_ty), boundary_check=(0, 1))
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_gsa_bwd_kernel_intra_KV(
     v,

@@ -6,12 +6,15 @@ from typing import Tuple
 import torch
 import triton
 import triton.language as tl
+import triton_viz
+from triton_viz.clients import Sanitizer
 
 from fla.utils import contiguous
 
 # on-the-fly computation without materializing hidden statets into HBMs
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def fused_recurrent_retention_fwd_kernel(
     q,
@@ -77,6 +80,7 @@ def fused_recurrent_retention_fwd_kernel(
     'USE_INITIAL_STATE': lambda args: args['h0'] is not None,
     'USE_FINAL_STATE_GRADIENT': lambda args: args['dht'] is not None
 })
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def fused_recurrent_retention_bwd_kernel(
     q,

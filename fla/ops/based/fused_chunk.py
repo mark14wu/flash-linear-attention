@@ -6,12 +6,15 @@ from typing import Optional
 import torch
 import triton
 import triton.language as tl
+import triton_viz
+from triton_viz.clients import Sanitizer
 
 from fla.utils import autocast_custom_bwd, autocast_custom_fwd, contiguous
 
 # on-the-fly computation without materializing hidden statets into HBMs
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def fused_chunk_based_fwd_kernel(
     q,  # query [B, H, L, K]
@@ -117,6 +120,7 @@ def fused_chunk_based_fwd_kernel(
 
 
 # Similar to Algorithm1 of https://arxiv.org/abs/2006.16236
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def fused_chunk_based_bwd_kernel(
     # NV: number of split in the V dimension. NK: number of split in the K dimension

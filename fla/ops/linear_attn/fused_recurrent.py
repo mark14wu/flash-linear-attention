@@ -6,11 +6,14 @@ from typing import Optional, Tuple
 import torch
 import triton
 import triton.language as tl
+import triton_viz
+from triton_viz.clients import Sanitizer
 
 from fla.ops.linear_attn.utils import normalize_output
 from fla.utils import contiguous
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def fused_recurrent_linear_attn_fwd_kernel(
     q,  # query [B, H, L, K]
@@ -73,6 +76,7 @@ def fused_recurrent_linear_attn_fwd_kernel(
 
 
 # Similar to Algorithm1 of https://arxiv.org/abs/2006.16236
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def fused_recurrent_linear_attn_bwd_kernel(
     q,  # query [B, H, L, K]

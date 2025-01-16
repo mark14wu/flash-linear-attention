@@ -6,6 +6,8 @@ from typing import Tuple
 import torch
 import triton
 import triton.language as tl
+import triton_viz
+from triton_viz.clients import Sanitizer
 
 from fla.ops.utils import chunk_global_reversed_cumsum, chunk_local_cumsum
 from fla.utils import autocast_custom_bwd, autocast_custom_fwd, contiguous
@@ -15,6 +17,7 @@ from fla.utils import autocast_custom_bwd, autocast_custom_fwd, contiguous
     'NV': lambda args: triton.cdiv(args['V'], args['BV']),
     'OUTPUT_ATTENTIONS': lambda args: args['attn'] is not None
 })
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def parallel_simple_gla_fwd_kernel(
     q,
@@ -124,6 +127,7 @@ def parallel_simple_gla_fwd_kernel(
     tl.store(p_o, b_o.to(p_o.dtype.element_ty), boundary_check=(0, 1))
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def parallel_simple_gla_bwd_kernel_dq(
     i_bh,
@@ -216,6 +220,7 @@ def parallel_simple_gla_bwd_kernel_dq(
     tl.store(p_dg, b_dg.to(p_dg.dtype.element_ty), boundary_check=(0,))
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def parallel_simple_gla_bwd_kernel_dkv(
     i_bh,
@@ -332,6 +337,7 @@ def parallel_simple_gla_bwd_kernel_dkv(
 @triton.heuristics({
     'NV': lambda args: triton.cdiv(args['V'], args['BV'])
 })
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def parallel_simple_gla_bwd_kernel(
     q,

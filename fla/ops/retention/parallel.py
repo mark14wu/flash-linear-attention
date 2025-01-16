@@ -6,6 +6,8 @@ from typing import Tuple
 import torch
 import triton
 import triton.language as tl
+import triton_viz
+from triton_viz.clients import Sanitizer
 
 from fla.utils import autocast_custom_bwd, autocast_custom_fwd, contiguous
 
@@ -14,6 +16,7 @@ from fla.utils import autocast_custom_bwd, autocast_custom_fwd, contiguous
     'NV': lambda args: triton.cdiv(args['V'], args['BV']),
     'OUTPUT_ATTENTIONS': lambda args: args['attn'] is not None
 })
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def parallel_retention_fwd_kernel(
     q,
@@ -293,6 +296,7 @@ def parallel_retention_bwd_kernel_dkv(
 @triton.heuristics({
     'NV': lambda args: triton.cdiv(args['V'], args['BV'])
 })
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def parallel_retention_bwd_kernel(
     q,

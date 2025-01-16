@@ -23,6 +23,8 @@ from typing import Tuple
 import torch
 import triton
 import triton.language as tl
+import triton_viz
+from triton_viz.clients import Sanitizer
 
 from fla.utils import contiguous
 
@@ -44,6 +46,7 @@ from fla.utils import contiguous
     ],
     key=['D']
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_hgrn_fwd_kernel_h(
     x,
@@ -86,6 +89,7 @@ def chunk_hgrn_fwd_kernel_h(
         p_o += D
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_hgrn_fwd_kernel_o(
     gc,
@@ -132,6 +136,7 @@ def chunk_hgrn_fwd_kernel_o(
     ],
     key=['D']
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_hgrn_bwd_kernel_h(
     g,
@@ -178,6 +183,7 @@ def chunk_hgrn_bwd_kernel_h(
         p_do -= D
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_hgrn_bwd_kernel_o(
     g,

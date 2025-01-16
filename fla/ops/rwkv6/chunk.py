@@ -6,6 +6,8 @@ from typing import Optional, Tuple
 import torch
 import triton
 import triton.language as tl
+import triton_viz
+from triton_viz.clients import Sanitizer
 
 from fla.ops.common.chunk_h import chunk_fwd_h_fn
 from fla.ops.gla.chunk import chunk_gla_bwd_dA_fn, chunk_gla_bwd_dv_fn
@@ -27,6 +29,7 @@ from fla.utils import contiguous
     ],
     key=['S']
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_rwkv6_fwd_cumsum_kernel(
     s,
@@ -79,6 +82,7 @@ def chunk_rwkv6_fwd_cumsum_fn(g, BT):
     ],
     key=["BC", "BK"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_rwkv6_fwd_A_kernel_intra_sub_inter(
     q,
@@ -138,6 +142,7 @@ def chunk_rwkv6_fwd_A_kernel_intra_sub_inter(
     ],
     key=["BK", "BT"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_rwkv6_fwd_A_kernel_intra_sub_intra(
     q,
@@ -202,6 +207,7 @@ def chunk_rwkv6_fwd_A_kernel_intra_sub_intra(
     ],
     key=["BC", "BK"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_rwkv6_fwd_A_kernel_intra_sub_intra_split(
     q,
@@ -266,6 +272,7 @@ def chunk_rwkv6_fwd_A_kernel_intra_sub_intra_split(
     ],
     key=["BC"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_rwkv6_fwd_A_kernel_intra_sub_intra_merge(
     A,
@@ -297,6 +304,7 @@ def chunk_rwkv6_fwd_A_kernel_intra_sub_intra_merge(
     ],
     key=["BK", "BV", "BT"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_rwkv6_fwd_kernel_inter(
     q,
@@ -364,6 +372,7 @@ def chunk_rwkv6_fwd_kernel_inter(
     ],
     key=["BK", "NC", "BT"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_rwkv6_bwd_kernel_intra(
     q,
@@ -493,6 +502,7 @@ def chunk_rwkv6_bwd_kernel_intra(
     ],
     key=["BK", "BV", "BT"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_rwkv6_bwd_kernel_inter(
     q,
@@ -722,6 +732,7 @@ def chunk_rwkv6_bwd_dqkgu_fn(q, k, v, h, g_cumsum_inclusive, g_cumsum_exclusive,
     'STORE_INITIAL_STATE_GRADIENT': lambda args: args['dh0'] is not None,
     'USE_FINAL_STATE_GRADIENT': lambda args: args['dht'] is not None
 })
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_rwkv6_bwd_kernel_dh(
     q,

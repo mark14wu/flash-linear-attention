@@ -3,6 +3,8 @@
 import torch
 import triton
 import triton.language as tl
+import triton_viz
+from triton_viz.clients import Sanitizer
 from einops import rearrange
 
 from fla.utils import autocast_custom_bwd, autocast_custom_fwd, contiguous
@@ -17,6 +19,7 @@ from fla.utils import autocast_custom_bwd, autocast_custom_fwd, contiguous
     ],
     key=["BK"]
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def fwd_prepare_wy_repr_kernel_chunk32(
     k,
@@ -68,6 +71,7 @@ def fwd_prepare_wy_repr_kernel_chunk32(
     ],
     key=["BK"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def fwd_prepare_wy_repr_kernel_chunk64(
     k,
@@ -143,6 +147,7 @@ def fwd_prepare_wy_repr_kernel_chunk64(
     ],
     key=["BT", "BK", "BV"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def fwd_recompute_w_u_kernel(
     k,
@@ -239,6 +244,7 @@ def fwd_recompute_w_kernel(
     ],
     key=["BT", "BK", "BV"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def bwd_prepare_wy_repr_kernel(
     k, v, beta, A,

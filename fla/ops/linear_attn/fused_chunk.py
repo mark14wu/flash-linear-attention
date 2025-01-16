@@ -6,12 +6,15 @@ from typing import Optional, Tuple
 import torch
 import triton
 import triton.language as tl
+import triton_viz
+from triton_viz.clients import Sanitizer
 from packaging import version
 
 from fla.ops.linear_attn.utils import normalize_output
 from fla.utils import autocast_custom_bwd, autocast_custom_fwd, contiguous
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def fused_chunk_linear_attn_fwd_kernel(
     q,  # query [B, H, T, K]
@@ -90,6 +93,7 @@ def fused_chunk_linear_attn_fwd_kernel(
         tl.store(p_ht, b_h.to(p_ht.dtype.element_ty), boundary_check=(0, 1))
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def fused_chunk_linear_attn_bwd_kernel(
     q,  # query [B, H, T, K]

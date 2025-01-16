@@ -6,6 +6,8 @@ from typing import Optional
 import torch
 import triton
 import triton.language as tl
+import triton_viz
+from triton_viz.clients import Sanitizer
 
 from fla.utils import contiguous
 
@@ -24,6 +26,7 @@ from fla.utils import contiguous
     ],
     key=['S']
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def logcumsumexp_fwd_kernel(
     s,
@@ -74,6 +77,7 @@ def logcumsumexp_fwd_kernel(
     ],
     key=['S']
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def softmax_fwd_kernel(
     s,
@@ -110,6 +114,7 @@ def softmax_fwd_kernel(
     ],
     key=['S']
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def softmax_bwd_kernel(
     p,
@@ -151,6 +156,7 @@ def softmax_bwd_kernel(
     ],
     key=['S']
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_global_reversed_cumsum_vector_kernel(
     s,
@@ -194,6 +200,7 @@ def chunk_global_reversed_cumsum_vector_kernel(
     ],
     key=['S']
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_global_cumsum_vector_kernel(
     s,
@@ -231,6 +238,7 @@ def chunk_global_cumsum_vector_kernel(
     ],
     key=[]
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_global_reversed_cumsum_scalar_kernel(
     s,
@@ -260,6 +268,7 @@ def chunk_global_reversed_cumsum_scalar_kernel(
     ],
     key=[]
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_global_cumsum_scalar_kernel(
     s,
@@ -293,6 +302,7 @@ def chunk_global_cumsum_scalar_kernel(
     ],
     key=['S', 'BT']
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_local_cumsum_vector_kernel(
     s,
@@ -325,6 +335,7 @@ def chunk_local_cumsum_vector_kernel(
     ],
     key=['BT']
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_local_cumsum_scalar_kernel(
     s,

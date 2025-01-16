@@ -7,6 +7,8 @@ from typing import Optional
 import torch
 import triton
 import triton.language as tl
+import triton_viz
+from triton_viz.clients import Sanitizer
 
 from fla.utils import autocast_custom_bwd, autocast_custom_fwd, contiguous
 
@@ -14,6 +16,7 @@ from fla.utils import autocast_custom_bwd, autocast_custom_fwd, contiguous
 # https://hazyresearch.stanford.edu/blog/2023-12-11-zoology2-based
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def parallel_based_fwd_kernel(
     q,  # query [B, H, L, K]
@@ -265,6 +268,7 @@ def _parallel_based_bwd_dkv(
     return
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def parallel_based_bwd_kernel(
     q,

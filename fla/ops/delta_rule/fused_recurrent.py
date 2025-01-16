@@ -6,11 +6,14 @@ from typing import Tuple
 import torch
 import triton
 import triton.language as tl
+import triton_viz
+from triton_viz.clients import Sanitizer
 
 from fla.utils import contiguous
 
 
 # on-the-fly computation without materializing hidden statets into HBMs
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def fused_recurrent_fwd_kernel(
     # B: batch_size, H: n_heads, T: seq_len, D: d_head
@@ -90,6 +93,7 @@ def fused_recurrent_fwd_kernel(
 
 
 # Similar to Algorithm1 of https://arxiv.org/abs/2006.16236
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def fused_recurrent_bwd_kernel(
     # B: batch_size, H: n_heads, T: seq_len, D: d_head

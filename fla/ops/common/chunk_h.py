@@ -4,6 +4,8 @@
 import torch
 import triton
 import triton.language as tl
+import triton_viz
+from triton_viz.clients import Sanitizer
 
 
 @triton.autotune(
@@ -19,6 +21,7 @@ import triton.language as tl
     'USE_INITIAL_STATE': lambda args: args['h0'] is not None,
     'STORE_FINAL_STATE': lambda args: args['ht'] is not None
 })
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_fwd_kernel_h(
     k,
@@ -121,6 +124,7 @@ def chunk_fwd_kernel_h(
     'STORE_INITIAL_STATE_GRADIENT': lambda args: args['dh0'] is not None,
     'USE_FINAL_STATE_GRADIENT': lambda args: args['dht'] is not None
 })
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_bwd_kernel_dh(
     q,

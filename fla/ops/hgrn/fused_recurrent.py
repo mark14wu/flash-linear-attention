@@ -6,6 +6,8 @@ from typing import Tuple
 import torch
 import triton
 import triton.language as tl
+import triton_viz
+from triton_viz.clients import Sanitizer
 
 from fla.utils import contiguous
 
@@ -27,6 +29,7 @@ from fla.utils import contiguous
     ],
     key=['D']
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def fused_recurrent_hgrn_fwd_kernel(
     x,
@@ -84,6 +87,7 @@ def fused_recurrent_hgrn_fwd_kernel(
     ],
     key=['D']
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def fused_recurrent_hgrn_bwd_kernel(
     g,

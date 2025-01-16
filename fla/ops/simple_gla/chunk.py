@@ -6,6 +6,8 @@ from typing import Optional, Tuple
 import torch
 import triton
 import triton.language as tl
+import triton_viz
+from triton_viz.clients import Sanitizer
 
 from fla.ops.common.chunk_h import chunk_bwd_dh_fn, chunk_fwd_h_fn
 from fla.ops.utils import chunk_local_cumsum
@@ -18,6 +20,7 @@ from fla.utils import autocast_custom_bwd, autocast_custom_fwd, contiguous
     ],
     key=["BT", "BK", "BV"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_simple_gla_fwd_kernel_o(
     q,
@@ -80,6 +83,7 @@ def chunk_simple_gla_fwd_kernel_o(
     ],
     key=["BT", "BK", "BV"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_simple_gla_bwd_kernel_dqkg(
     q,
@@ -190,6 +194,7 @@ def chunk_fwd_o_fn(h, q, k, v, g, BT, scale):
     ],
     key=['BT']
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def compute_final_dg(
     dg,
@@ -239,6 +244,7 @@ def chunk_bwd_dqkg_fn(do, q, k, v, g, h, dh, scale):
     ],
     key=["BT", "BK", "BV"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_bwd_dv_kernel(
     q,

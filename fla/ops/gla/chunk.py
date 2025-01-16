@@ -6,6 +6,8 @@ from typing import Optional, Tuple
 import torch
 import triton
 import triton.language as tl
+import triton_viz
+from triton_viz.clients import Sanitizer
 
 from fla.ops.common.chunk_h import chunk_bwd_dh_fn, chunk_fwd_h_fn
 from fla.ops.utils import chunk_local_cumsum
@@ -21,6 +23,7 @@ from fla.utils import contiguous
     ],
     key=["BC", "BK"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_gla_fwd_A_kernel_intra_sub_inter(
     q,
@@ -80,6 +83,7 @@ def chunk_gla_fwd_A_kernel_intra_sub_inter(
     ],
     key=["BK", "BT"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_gla_fwd_A_kernel_intra_sub_intra(
     q,
@@ -133,6 +137,7 @@ def chunk_gla_fwd_A_kernel_intra_sub_intra(
     ],
     key=["BC", "BK"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_gla_fwd_A_kernel_intra_sub_intra_split(
     q,
@@ -175,7 +180,8 @@ def chunk_gla_fwd_A_kernel_intra_sub_intra_split(
         b_gk = tl.load(p_gk, mask=m_k, other=0).to(tl.float32)
         b_A += tl.sum(b_q * b_k[None, :] * tl.exp(b_g - b_gk[None, :]), 1)
         b_A = tl.where(o_i >= j, b_A * scale, 0.)
-        tl.store(A + o_A + j, b_A, mask=m_A)
+        print('A:', A, 'o_A:', o_A, 'j:', j, 'BC:', BC)
+        tl.store(A + o_A + j * BC, b_A, mask=m_A)
         p_k += K
         p_gk += K
 
@@ -189,6 +195,7 @@ def chunk_gla_fwd_A_kernel_intra_sub_intra_split(
     ],
     key=["BC"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_gla_fwd_A_kernel_intra_sub_intra_merge(
     A,
@@ -219,6 +226,7 @@ def chunk_gla_fwd_A_kernel_intra_sub_intra_merge(
     ],
     key=["BK", "BV", "BT"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_gla_fwd_kernel_o(
     q,
@@ -285,6 +293,7 @@ def chunk_gla_fwd_kernel_o(
     ],
     key=["BK", "NC", "BT"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_gla_bwd_kernel_intra(
     q,
@@ -411,6 +420,7 @@ def chunk_gla_bwd_kernel_intra(
     ],
     key=["BV", "BT"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_gla_bwd_kernel_dA(
     v,
@@ -447,6 +457,7 @@ def chunk_gla_bwd_kernel_dA(
     ],
     key=["BK", "BV", "BT"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_gla_bwd_kernel_dv(
     k,
@@ -510,6 +521,7 @@ def chunk_gla_bwd_kernel_dv(
     ],
     key=["BK", "BV", "BT"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_gla_bwd_kernel_inter(
     q,

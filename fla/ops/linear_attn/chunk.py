@@ -6,11 +6,14 @@ from typing import Optional, Tuple
 import torch
 import triton
 import triton.language as tl
+import triton_viz
+from triton_viz.clients import Sanitizer
 
 from fla.ops.linear_attn.utils import normalize_output
 from fla.utils import autocast_custom_bwd, autocast_custom_fwd, contiguous
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_linear_attn_fwd_kernel_h(
     k,
@@ -63,6 +66,7 @@ def chunk_linear_attn_fwd_kernel_h(
         tl.store(p_ht, b_h.to(p_ht.dtype.element_ty), boundary_check=(0, 1))
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_linear_attn_fwd_kernel_o(
     q,
@@ -116,6 +120,7 @@ def chunk_linear_attn_fwd_kernel_o(
     tl.store(p_o, b_o.to(p_o.dtype.element_ty), boundary_check=(0, 1))
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_linear_attn_bwd_kernel_dh(
     q,
@@ -157,6 +162,7 @@ def chunk_linear_attn_bwd_kernel_dh(
         b_dh += tl.dot(b_q, b_do.to(b_q.dtype), allow_tf32=False)
 
 
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_linear_attn_bwd_kernel_dqkv(
     q,

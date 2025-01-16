@@ -6,6 +6,8 @@ from typing import Optional, Tuple
 import torch
 import triton
 import triton.language as tl
+import triton_viz
+from triton_viz.clients import Sanitizer
 
 from fla.utils import autocast_custom_bwd, autocast_custom_fwd, contiguous
 
@@ -18,6 +20,7 @@ from fla.utils import autocast_custom_bwd, autocast_custom_fwd, contiguous
     ],
     key=["BT", "BK", "BV"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_retention_fwd_kernel_h(
     k,
@@ -84,6 +87,7 @@ def chunk_retention_fwd_kernel_h(
     ],
     key=["BT", "BK", "BV"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_retention_fwd_kernel_o(
     q,
@@ -151,6 +155,7 @@ def chunk_retention_fwd_kernel_o(
     'STORE_INITIAL_STATE_GRADIENT': lambda args: args['dh0'] is not None,
     'USE_FINAL_STATE_GRADIENT': lambda args: args['dht'] is not None
 })
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_retention_bwd_kernel_dh(
     q,
@@ -216,6 +221,7 @@ def chunk_retention_bwd_kernel_dh(
     ],
     key=["BT", "BK", "BV"],
 )
+@triton_viz.trace(clients=Sanitizer(abort_on_error=True))
 @triton.jit
 def chunk_retention_bwd_kernel_dqkv(
     q,
